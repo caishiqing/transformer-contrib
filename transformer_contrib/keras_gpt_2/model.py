@@ -72,6 +72,7 @@ def get_gpt2(n_vocab,
              n_embd=768,
              n_head=12,
              n_layer=12,
+             pad_id=None,
              hidden_dim=None,
              batch_size=None,
              fixed_input_shape=False,
@@ -102,7 +103,7 @@ def get_gpt2(n_vocab,
     embed_token, embeddings = EmbeddingRet(
         input_dim=n_vocab,
         output_dim=n_embd,
-        mask_zero=True,
+        pad_id=pad_id,
         name='Embed-Token',
     )(input_layer)
     embed_token_pos = PositionEmbedding(

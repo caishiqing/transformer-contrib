@@ -6,6 +6,9 @@ __all__ = ['EmbeddingRet', 'EmbeddingSim']
 
 class EmbeddingRet(keras.layers.Embedding):
     """Embedding layer with weights returned."""
+    def __init__(self, input_dim, output_dim, pad_id=None, **kwargs):
+        super(EmbeddingRet, self).__init__(input_dim, output_dim, **kwargs)
+        self.pad_id = pad_id
 
     def compute_output_shape(self, input_shape):
         return [
@@ -14,10 +17,11 @@ class EmbeddingRet(keras.layers.Embedding):
         ]
 
     def compute_mask(self, inputs, mask=None):
-        return [
-            super(EmbeddingRet, self).compute_mask(inputs, mask),
-            None,
-        ]
+        if self.pad_id is not None:
+            output_mask = K.not_equal(inputs, self.pad_id)
+        else:
+            output_mask = None
+        return [output_mask, None]
 
     def call(self, inputs):
         return [
@@ -97,8 +101,6 @@ class EmbeddingSim(keras.layers.Layer):
         if self.use_bias:
             outputs = K.bias_add(outputs, self.bias)
         return keras.activations.softmax(outputs)
-
-
 
 utils.get_custom_objects().update(
     {
