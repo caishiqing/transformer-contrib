@@ -77,6 +77,7 @@ def get_gpt2(n_vocab,
              batch_size=None,
              fixed_input_shape=False,
              return_last_layer=True,
+             return_logits=False,
              compile=True):
     """Get basic GPT-2 model.
 
@@ -137,14 +138,19 @@ def get_gpt2(n_vocab,
     
     output_layer = EmbeddingSim(
         use_bias=False,
+        return_logits=return_logits,
         name='Output',
     )([norm_layer, embeddings])
 
     model = keras.models.Model(inputs=input_layer, outputs=output_layer)
     if compile:
+        def _loss(y_true, y_pred):
+            return keras.losses.sparse_categorical_crossentropy(
+                y_true, y_pred, from_logits=return_logits,
+            )
         model.compile(
             optimizer=keras.optimizers.Adam(),
-            loss=keras.losses.sparse_categorical_crossentropy,
+            loss=_loss,
         )
     return model
 

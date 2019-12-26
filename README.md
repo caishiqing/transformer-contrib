@@ -8,6 +8,14 @@ os.environ['TF_KERAS'] = '1'
 
 
 
+## 更新说明
+
+**keras_bert: ** 修改了Tokenizer的rematch方法，将复杂度从O(N^2)降低为O(N).
+
+**keras_gpt_2:**  增加了pad_id（默认为None）参数和return_logits（默认为False）参数，pad_id指定需要mask的输入token，如果为None则无mask；return_logits指示最后一层输出logits还是概率分布。
+
+
+
 ## 基础网络层
 
 基础网络层定义在transformer_contrib.keras_layers中，包括keras_pos_embd，keras_layer_normalization，keras_embed_sim，keras_multi_head，keras_self_attention等，以keras_multi_head为例，调用方式为：

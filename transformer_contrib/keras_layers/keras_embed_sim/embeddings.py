@@ -39,6 +39,7 @@ class EmbeddingSim(keras.layers.Layer):
                  regularizer=None,
                  constraint=None,
                  stop_gradient=False,
+                 return_logits=False,
                  **kwargs):
         """Initialize the layer.
 
@@ -57,6 +58,7 @@ class EmbeddingSim(keras.layers.Layer):
         self.regularizer = keras.regularizers.get(regularizer)
         self.constraint = keras.constraints.get(constraint)
         self.stop_gradient = stop_gradient
+        self.return_logits = return_logits
         self.bias = None
 
     def get_config(self):
@@ -100,6 +102,8 @@ class EmbeddingSim(keras.layers.Layer):
         outputs = K.dot(inputs, K.transpose(embeddings))
         if self.use_bias:
             outputs = K.bias_add(outputs, self.bias)
+        if self.return_logits:
+            return outputs
         return keras.activations.softmax(outputs)
 
 utils.get_custom_objects().update(
