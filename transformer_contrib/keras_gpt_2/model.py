@@ -87,9 +87,11 @@ def get_gpt2(n_vocab,
     :param n_head: Number of heads in transformer.
     :param hidden_dim: The dimension of hidden layer.
     :param n_layer: Number of transformer blocks.
+    :param pad_id: Input tokens should be masked.
     :param batch_size: Batch size of the model.
     :param fixed_input_shape: Whether the length of input is fixed. (Needed for TPU training)
     :param return_last_layer: Wether return output layer.
+    :param return_logits: Whether return logist or pdf by last layer.
     :return: The model.
     """
     if fixed_input_shape:

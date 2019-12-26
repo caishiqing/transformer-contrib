@@ -49,6 +49,7 @@ class EmbeddingSim(keras.layers.Layer):
         :param regularizer: Regularizer for bias.
         :param constraint: Constraint for bias.
         :param stop_gradient: Whether to stop gradient for input embedding.
+        :param return_logits: Whether return logist or pdf by last layer.
         :param kwargs: Arguments for parent class.
         """
         super(EmbeddingSim, self).__init__(**kwargs)
