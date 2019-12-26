@@ -98,6 +98,7 @@ def get_gpt2(n_vocab,
     input_layer = keras.layers.Input(
         batch_shape=input_layer_shape,
         name='Input',
+        dtype='int32'
     )
 
     embed_token, embeddings = EmbeddingRet(
