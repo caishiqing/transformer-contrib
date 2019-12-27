@@ -2,7 +2,7 @@ from .backend import keras
 from ..keras_layers import (EmbeddingRet, EmbeddingSim,
                             PositionEmbedding, LayerNormalization)
 from ..keras_transformer import gelu, attention_builder, feed_forward_builder
-
+from .layers import *
 
 def _wrap_layer(name, input_layer, build_func, trainable=True):
     """Wrap layers with normalization and residual.
@@ -25,6 +25,7 @@ def _get_encoder_component(name,
                            input_layer,
                            head_num,
                            hidden_dim,
+                           past_layer=None,
                            attention_activation=None,
                            feed_forward_activation='relu',
                            trainable=True):
@@ -41,9 +42,15 @@ def _get_encoder_component(name,
     """
     attention_name = '%s-MultiHeadAtt' % name
     feed_forward_name = '%s-FeedForward' % name
+    if past_layer is None:
+        present_layer = input_layer
+        inputs = input_layer
+    else:
+        present_layer = tf.concat([past_layer, input_layer], axis=-2)
+        inputs = [input_layer, present_layer, present_layer]
     attention_layer = _wrap_layer(
         name=attention_name,
-        input_layer=input_layer,
+        input_layer=inputs,
         build_func=attention_builder(
             name=attention_name,
             head_num=head_num,
@@ -64,8 +71,28 @@ def _get_encoder_component(name,
         ),
         trainable=trainable,
     )
-    return feed_forward_layer
+    return feed_forward_layer, present_layer
 
+class GatherLayer(keras.layers.Layer):
+    def __init__(self, n, **kwargs):
+        super().__init(**kwargs)
+        self.n = n
+        self.support_masking = True
+        
+    def call(self, inputs, **kwargs):
+        if inputs is None:
+            return None
+        return inputs[:, self.n]
+        
+    def compute_mask(self, inputs, mask=None):
+        if mask is None:
+            return None
+        if inputs is None:
+            return None
+        return mask[:, self.n]
+        
+    def compute_output_shape(self, input_shape):
+        return input_shape[0], input_shape[2], input_shape[3]
 
 def get_gpt2(n_vocab,
              n_ctx=1024,
@@ -103,6 +130,11 @@ def get_gpt2(n_vocab,
         name='Input',
         dtype='int32'
     )
+    past_layers = keras.layers.Input(
+        batch_shape=(batch_size, n_layer, None, n_embd),
+        name='Input',
+        dtype='int32'
+    )
 
     embed_token, embeddings = EmbeddingRet(
         input_dim=n_vocab,
@@ -120,7 +152,12 @@ def get_gpt2(n_vocab,
     if not hidden_dim:
         hidden_dim = n_embd * 4
     last_layer = embed_token_pos
+    present_layers = []
     for i in range(n_layer):
+        if past_layers is None:
+            past_layer = None
+        else:
+            past_layer = past_layers[:, i, :, :]
         last_layer = _get_encoder_component(
             name='Encode-%d' % i,
             input_layer=last_layer,
