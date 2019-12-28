@@ -112,7 +112,7 @@ class PositionEmbedding(keras.layers.Layer):
             return input_shape[:-1] + (input_shape[-1] + self.output_dim,)
         return input_shape
 
-    def call(self, inputs, **kwargs):
+    def call(self, inputs, mask=None, **kwargs):
         if self.mode == self.MODE_EXPAND:
             if K.dtype(inputs) != 'int32':
                 inputs = K.cast(inputs, 'int32')
@@ -125,10 +125,18 @@ class PositionEmbedding(keras.layers.Layer):
             batch_size, seq_len, output_dim = input_shape[0], input_shape[1], input_shape[2]
         else:
             batch_size, seq_len, output_dim = input_shape[0], input_shape[1], self.output_dim
-        pos_embeddings = K.tile(
-            K.expand_dims(self.embeddings[:seq_len, :self.output_dim], axis=0),
-            [batch_size, 1, 1],
-        )
+        if mask is not None:
+            mask = K.cast(mask, dtype='int32')
+            print(mask)
+            mask += K.constant([[-1] + [0] * (K.int_shape(inputs)[1] - 1)], dtype='int32')
+            indices = K.cumsum(mask, axis=-1)
+            indices += K.cast(K.equal(indices, -1), 'int32')
+            pos_embeddings = K.gather(self.embeddings, indices)
+        else:
+            pos_embeddings = K.tile(
+                K.expand_dims(self.embeddings[:seq_len, :self.output_dim], axis=0),
+                [batch_size, 1, 1],
+            )
         if self.mode == self.MODE_ADD:
             return inputs + pos_embeddings
         return K.concatenate([inputs, pos_embeddings], axis=-1)

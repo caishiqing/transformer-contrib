@@ -113,6 +113,7 @@ def get_gpt2(n_vocab,
         input_dim=n_ctx,
         output_dim=n_embd,
         mode=PositionEmbedding.MODE_ADD,
+        mask_zero=pad_id is not None,
         name='Embed-Token-Pos',
     )(embed_token)
 
