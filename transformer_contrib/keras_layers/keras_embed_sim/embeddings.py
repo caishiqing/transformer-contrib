@@ -29,6 +29,13 @@ class EmbeddingRet(keras.layers.Embedding):
             K.identity(self.embeddings),
         ]
 
+    def get_config(self):
+        config = {
+            'pad_id': self.pad_id,
+        }
+        base_config = super(EmbeddingRet, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
 
 class EmbeddingSim(keras.layers.Layer):
     """Calculate similarity between features and token embeddings with bias term."""
@@ -69,6 +76,7 @@ class EmbeddingSim(keras.layers.Layer):
             'regularizer': keras.regularizers.serialize(self.regularizer),
             'constraint': keras.constraints.serialize(self.constraint),
             'stop_gradient': self.stop_gradient,
+            'return_logits': self.return_logits,
         }
         base_config = super(EmbeddingSim, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
