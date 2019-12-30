@@ -1,7 +1,6 @@
 from .backend import keras
 from .backend import backend as K
 
-
 class PositionEmbedding(keras.layers.Layer):
     """Turn integers (positions) into dense vectors of fixed size.
     eg. [[-4], [10]] -> [[0.25, 0.1], [0.6, -0.2]]
@@ -127,9 +126,7 @@ class PositionEmbedding(keras.layers.Layer):
             batch_size, seq_len, output_dim = input_shape[0], input_shape[1], self.output_dim
         if mask is not None:
             mask = K.cast(mask, dtype='int32')
-            print(mask)
-            mask += K.constant([[-1] + [0] * (K.int_shape(inputs)[1] - 1)], dtype='int32')
-            indices = K.cumsum(mask, axis=-1)
+            indices = K.cumsum(mask, axis=-1) - 1  # position indice starts from 0
             indices += K.cast(K.equal(indices, -1), 'int32')
             pos_embeddings = K.gather(self.embeddings, indices)
         else:

@@ -120,6 +120,15 @@ def get_gpt2(n_vocab,
     if not hidden_dim:
         hidden_dim = n_embd * 4
     last_layer = embed_token_pos
+    for i in range(n_layer):
+        last_layer = _get_encoder_component(
+            name='Encode-%d' % i,
+            input_layer=last_layer,
+            head_num=n_head,
+            hidden_dim=hidden_dim,
+            attention_activation=None,
+            feed_forward_activation=gelu,
+        )
 
     norm_layer = LayerNormalization(
         name='Norm',
@@ -138,7 +147,7 @@ def get_gpt2(n_vocab,
     model = keras.models.Model(inputs=input_layer, outputs=output_layer)
     if compile:
         def _loss(y_true, y_pred):
-            return keras.losses.sparse_categorical_crossentropy(
+            return keras.backend.sparse_categorical_crossentropy(
                 y_true, y_pred, from_logits=return_logits,
             )
         model.compile(
