@@ -68,7 +68,9 @@ class ScaledDotProductAttention(keras.layers.Layer):
             e *= K.expand_dims(K.cast(indices <= upper, K.floatx()), axis=0)
         if mask is not None:
             e *= K.cast(K.expand_dims(mask, axis=-2), K.floatx())
-        a = e / (K.sum(e, axis=-1, keepdims=True) + K.epsilon())
+        s = K.sum(e, axis=-1, keepdims=True)
+        s += K.cast(K.equal(s, 0.0), K.floatx())
+        a = e / s
         v = K.batch_dot(a, value)
         if self.return_attention:
             return [v, a]
