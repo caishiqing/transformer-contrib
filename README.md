@@ -14,6 +14,8 @@ os.environ['TF_KERAS'] = '1'
 
 **keras_gpt_2:**  增加了pad_id（默认为None）参数和return_logits（默认为False）参数，pad_id指定需要mask的输入token，如果为None则无mask；return_logits指示最后一层输出logits还是概率分布。
 
+**keras_layers:**  ScaledDotProductAttention层修改attention mask分母添加epsilon的方式，原方式会导致注意力的误差累加，对gpt2的因果注意力造成影响。
+
 
 
 ## 基础网络层
