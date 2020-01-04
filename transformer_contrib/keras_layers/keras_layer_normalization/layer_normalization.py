@@ -63,8 +63,8 @@ class LayerNormalization(keras.layers.Layer):
     def compute_output_shape(self, input_shape):
         return input_shape
 
-    def compute_mask(self, inputs, input_mask=None):
-        return input_mask
+    def compute_mask(self, inputs, mask=None):
+        return mask
 
     def build(self, input_shape):
         self.input_spec = keras.engine.InputSpec(shape=input_shape)
