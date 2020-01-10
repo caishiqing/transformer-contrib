@@ -5,7 +5,11 @@ __all__ = ['EmbeddingRet', 'EmbeddingSim']
 
 
 class EmbeddingRet(keras.layers.Embedding):
-    """Embedding layer with weights returned."""
+    """Embedding layer with weights returned.
+    if mask_zero is True, than mask 0;
+    elif pad_id is not None, than mask pad_id;
+    else no masking.
+    """
     def __init__(self, input_dim, output_dim, pad_id=None, **kwargs):
         super(EmbeddingRet, self).__init__(input_dim, output_dim, **kwargs)
         self.pad_id = pad_id
@@ -17,7 +21,9 @@ class EmbeddingRet(keras.layers.Embedding):
         ]
 
     def compute_mask(self, inputs, mask=None):
-        if self.pad_id is not None:
+        if self.mask_zero:
+            output_mask = super().compute_mask(inputs, mask)
+        elif self.pad_id is not None:
             output_mask = K.not_equal(inputs, self.pad_id)
         else:
             output_mask = None
