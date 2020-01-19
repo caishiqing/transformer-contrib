@@ -22,19 +22,18 @@ TOKEN_SEP = '[SEP]'  # Token for separation
 TOKEN_MASK = '[MASK]'  # Token for masking
 
 def get_model(token_num,
-             pos_num=512,
-             seq_len=512,
-             embed_dim=768,
-             transformer_num=12,
-             head_num=12,
-             feed_forward_dim=3072,
-             dropout_rate=0.1,
-             attention_activation=None,
-             feed_forward_activation='gelu',
-             training=True,
-             trainable=True,
-             output_layer_num=1,
-             lr=1e-4):
+              pos_num=512,
+              seq_len=512,
+              embed_dim=768,
+              transformer_num=12,
+              head_num=12,
+              feed_forward_dim=3072,
+              dropout_rate=0.1,
+              attention_activation=None,
+              feed_forward_activation='gelu',
+              training=True,
+              trainable=True,
+              output_layer_num=1):
     """Get BERT model.
 
     See: https://arxiv.org/pdf/1810.04805.pdf
@@ -55,9 +54,6 @@ def get_model(token_num,
     :param trainable: Whether the model is trainable.
     :param output_layer_num: The number of layers whose outputs will be concatenated as a single output.
                              Only available when `training` is `False`.
-    :param decay_steps: Learning rate will decay linearly to zero in decay steps.
-    :param warmup_steps: Learning rate will increase linearly to lr in first warmup steps.
-    :param lr: Learning rate.
     :return: The compiled model.
     """
     if attention_activation == 'gelu':
