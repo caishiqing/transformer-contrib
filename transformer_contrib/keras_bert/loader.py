@@ -26,7 +26,7 @@ def build_model_from_config(config_file,
                             dropout=None,
                             transformer_num=None,
                             training=False,
-                            trainable=None,
+                            trainable=True,
                             seq_len=None):
     """Build the model from config file.
 
@@ -60,13 +60,6 @@ def build_model_from_config(config_file,
         training=training,
         trainable=trainable,
     )
-    if not training:
-        inputs, outputs = model
-        model = keras.models.Model(inputs=inputs, outputs=outputs)
-        model.compile(
-            optimizer=keras.optimizers.Adam(),
-            loss=keras.losses.sparse_categorical_crossentropy,
-        )
     return model, config
 
 
