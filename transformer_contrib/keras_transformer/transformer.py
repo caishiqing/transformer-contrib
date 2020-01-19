@@ -274,9 +274,11 @@ def get_model(token_num,
               decoder_num,
               head_num,
               hidden_dim,
+              pad_id=0,
               attention_activation=None,
               feed_forward_activation='relu',
               dropout_rate=0.0,
+              return_logits=True,
               use_same_embed=True,
               embed_weights=None,
               embed_trainable=None,
@@ -289,9 +291,11 @@ def get_model(token_num,
     :param decoder_num: Number of decoder components.
     :param head_num: Number of heads in multi-head self-attention.
     :param hidden_dim: Hidden dimension of feed forward layer.
+    :param pad_id: Padding id shold be masked.
     :param attention_activation: Activation for multi-head self-attention.
     :param feed_forward_activation: Activation for feed-forward layer.
     :param dropout_rate: Dropout rate.
+    :param return_logits: Wether return logits or pdf.
     :param use_same_embed: Whether to use the same token embedding layer. `token_num`, `embed_weights` and
                            `embed_trainable` should be lists of two elements if it is False.
     :param embed_weights: Initial weights of token embedding.
@@ -324,7 +328,7 @@ def get_model(token_num,
         encoder_embed_layer = decoder_embed_layer = EmbeddingRet(
             input_dim=encoder_token_num,
             output_dim=embed_dim,
-            mask_zero=True,
+            pad_id=pad_id,
             weights=encoder_embed_weights,
             trainable=encoder_embed_trainable,
             name='Token-Embedding',
@@ -333,7 +337,7 @@ def get_model(token_num,
         encoder_embed_layer = EmbeddingRet(
             input_dim=encoder_token_num,
             output_dim=embed_dim,
-            mask_zero=True,
+            pad_id=pad_id,
             weights=encoder_embed_weights,
             trainable=encoder_embed_trainable,
             name='Encoder-Token-Embedding',
@@ -341,7 +345,7 @@ def get_model(token_num,
         decoder_embed_layer = EmbeddingRet(
             input_dim=decoder_token_num,
             output_dim=embed_dim,
-            mask_zero=True,
+            pad_id=pad_id,
             weights=decoder_embed_weights,
             trainable=decoder_embed_trainable,
             name='Decoder-Token-Embedding',
@@ -361,8 +365,11 @@ def get_model(token_num,
         dropout_rate=dropout_rate,
         trainable=trainable,
     )
-    decoder_input = keras.layers.Input(shape=(None,), name='Decoder-Input')
-    decoder_embed, decoder_embed_weights = decoder_embed_layer(decoder_input)
+    encoder = keras.models.Model(inputs=encoder_input, outputs=encoder_embed)
+    
+    encoder_h = keras.layers.Input(shape=(None, embed_dim), name='Encoder-H')
+    decoder_x = keras.layers.Input(shape=(None,), name='Decoder-X')
+    decoder_embed, decoder_embed_weights = decoder_embed_layer(decoder_x)
     decoder_embed = TrigPosEmbedding(
         mode=TrigPosEmbedding.MODE_ADD,
         name='Decoder-Embedding',
@@ -370,7 +377,7 @@ def get_model(token_num,
     decoded_layer = get_decoders(
         decoder_num=decoder_num,
         input_layer=decoder_embed,
-        encoded_layer=encoded_layer,
+        encoded_layer=encoder_h,
         head_num=head_num,
         hidden_dim=hidden_dim,
         attention_activation=attention_activation,
@@ -380,9 +387,16 @@ def get_model(token_num,
     )
     dense_layer = EmbeddingSim(
         trainable=trainable,
+        return_logits=return_logits,
         name='Output',
     )([decoded_layer, decoder_embed_weights])
-    return keras.models.Model(inputs=[encoder_input, decoder_input], outputs=dense_layer)
+    decoder = keras.models.Model(inputs=[encoder_h, decoder_x], outputs=dense_layer)
+    
+    decoder_input = keras.layers.Input(shape=(None,), name='Decoder-Input')
+    decoder_output = decoder([encoder_embed, decoder_input])
+    model = keras.models.Model(inputs=[encoder_input, decoder_input], outputs=decoder_output)
+    
+    return model, encoder, decoder
 
 
 def _get_max_suffix_repeat_times(tokens, max_len):
