@@ -32,7 +32,7 @@ def get_model(token_num,
              attention_activation=None,
              feed_forward_activation='gelu',
              training=True,
-             trainable=None,
+             trainable=True,
              output_layer_num=1,
              lr=1e-4):
     """Get BERT model.
@@ -64,8 +64,6 @@ def get_model(token_num,
         attention_activation = gelu
     if feed_forward_activation == 'gelu':
         feed_forward_activation = gelu
-    if trainable is None:
-        trainable = training
 
     def _trainable(_layer):
         if isinstance(trainable, (list, tuple, set)):
@@ -113,22 +111,12 @@ def get_model(token_num,
             name='NSP',
         )(nsp_dense_layer)
         model = keras.models.Model(inputs=inputs, outputs=[masked_layer, nsp_pred_layer])
-        for layer in model.layers:
-            layer.trainable = _trainable(layer)
-        return model
     else:
         inputs = inputs[:2]
         model = keras.models.Model(inputs=inputs, outputs=transformed)
-        for layer in model.layers:
-            layer.trainable = _trainable(layer)
-        output_layer_num = min(output_layer_num, transformer_num)
-        if output_layer_num > 1:
-            outputs = []
-            for i in range(output_layer_num):
-                layer = model.get_layer(name='Encoder-{}-FeedForward-Norm'.format(transformer_num - i))
-                outputs.append(layer.output)
-            transformed = keras.layers.Concatenate(name='Encoder-Output')(list(reversed(outputs)))
-        return inputs, transformed
+    
+    model.trainalble = trainable
+    return model
 
 
 def compile_model(model,
