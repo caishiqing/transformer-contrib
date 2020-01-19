@@ -1,6 +1,6 @@
 import json
 import tensorflow as tf
-from .model import get_gpt2
+from .model import get_model
 from .bpe import get_bpe_from_files
 
 
@@ -34,7 +34,7 @@ def load_trained_model_from_checkpoint(config_path,
     else:
         n_ctx = min(seq_len, config['n_ctx'])
     n_embd = config['n_embd']
-    model = get_gpt2(
+    model = get_model(
         n_vocab=config['n_vocab'],
         n_ctx=n_ctx,
         n_embd=n_embd,

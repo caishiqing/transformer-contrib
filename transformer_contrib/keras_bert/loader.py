@@ -1,7 +1,7 @@
 import json,os
 import numpy as np
 import tensorflow as tf
-from .bert import get_bert
+from .bert import get_model
 from .tokenizer import Tokenizer, load_vocab
 from transformer_contrib.backend import keras
 
@@ -49,7 +49,7 @@ def build_model_from_config(config_file,
     if trainable is None:
         trainable = training
 
-    model = get_bert(
+    model = get_model(
         token_num=config['vocab_size'],
         pos_num=config['max_position_embeddings'],
         seq_len=config['max_position_embeddings'],
@@ -198,10 +198,10 @@ def load_bert_from_hdf5(hdf5_file,
     if dropout is None:
         dropout = 0.1
 
-    inputs, outputs = get_bert(vocab_size, pos_num=seq_len, seq_len=seq_len,
-                               transformer_num=transformer_num,
-                               dropout_rate=dropout, training=training,
-                               trainable=trainable)
+    inputs, outputs = get_model(vocab_size, pos_num=seq_len, seq_len=seq_len,
+                                transformer_num=transformer_num,
+                                dropout_rate=dropout, training=training,
+                                trainable=trainable)
 
     model = keras.models.Model(inputs, outputs)
     
