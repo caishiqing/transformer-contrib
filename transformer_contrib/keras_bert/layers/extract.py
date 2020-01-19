@@ -1,4 +1,4 @@
-from ..backend import keras
+from transformer_contrib.backend import keras
 
 
 class Extract(keras.layers.Layer):

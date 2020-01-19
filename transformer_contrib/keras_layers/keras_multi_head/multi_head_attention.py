@@ -1,6 +1,6 @@
-from .backend import keras, TF_KERAS
-from .backend import backend as K
-from ..keras_self_attention import ScaledDotProductAttention
+from transformer_contrib.backend import keras, TF_KERAS
+from transformer_contrib.backend import backend as K
+from transformer_contrib.keras_layers.keras_self_attention import ScaledDotProductAttention
 
 
 class MultiHeadAttention(keras.layers.Layer):

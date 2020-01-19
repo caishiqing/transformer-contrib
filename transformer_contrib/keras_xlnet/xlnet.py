@@ -1,11 +1,11 @@
-from .backend import keras
+from transformer_contrib.backend import keras
 
-from ..keras_layers.keras_embed_sim import EmbeddingRet, EmbeddingSim
-from ..keras_layers.keras_trans_mask import CreateMask, RestoreMask
-from ..keras_transformer import gelu
-from ..keras_transformer_xl import RelativeBias, Memory
-from ..keras_layers.keras_layer_normalization import LayerNormalization
-from ..keras_layers.keras_position_wise_feed_forward import FeedForward
+from transformer_contrib.keras_layers.keras_embed_sim import EmbeddingRet, EmbeddingSim
+from transformer_contrib.keras_layers.keras_trans_mask import CreateMask, RestoreMask
+from transformer_contrib.keras_transformer import gelu
+from transformer_contrib.keras_transformer_xl import RelativeBias, Memory
+from transformer_contrib.keras_layers.keras_layer_normalization import LayerNormalization
+from transformer_contrib.keras_layers.keras_position_wise_feed_forward import FeedForward
 
 from .tokenizer import Tokenizer
 from .position_embed import PositionalEmbedding

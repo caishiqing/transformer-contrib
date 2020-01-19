@@ -1,7 +1,9 @@
 import numpy as np
-from .backend import keras
-from ..keras_layers import (AdaptiveEmbedding, AdaptiveSoftmax,
-                            LayerNormalization, FeedForward)
+from transformer_contrib.backend import keras
+from transformer_contrib.keras_layers import (AdaptiveEmbedding, 
+                                              AdaptiveSoftmax,
+                                              LayerNormalization, 
+                                              FeedForward)
 from .scale import Scale
 from .memory import Memory
 from .pos_embed import PositionalEmbedding

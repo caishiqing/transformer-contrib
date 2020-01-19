@@ -1,7 +1,7 @@
-from ..backend import keras
-from ..backend import backend as K
-from ...keras_layers import PositionEmbedding
-from ...keras_layers import LayerNormalization
+from transformer_contrib.backend import keras
+from transformer_contrib.backend import backend as K
+from transformer_contrib.keras_layers import PositionEmbedding
+from transformer_contrib.keras_layers import LayerNormalization
 
 
 class TokenEmbedding(keras.layers.Embedding):

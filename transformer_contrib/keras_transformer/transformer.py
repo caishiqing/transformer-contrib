@@ -1,8 +1,11 @@
 import numpy as np
-from .backend import keras
-from ..keras_layers import (LayerNormalization, MultiHeadAttention,
-                            FeedForward, TrigPosEmbedding,
-                            EmbeddingRet, EmbeddingSim)
+from transformer_contrib.backend import keras
+from transformer_contrib.keras_layers import (LayerNormalization, 
+                                              MultiHeadAttention,
+                                              FeedForward, 
+                                              TrigPosEmbedding,
+                                              EmbeddingRet, 
+                                              EmbeddingSim)
 
 
 __all__ = [

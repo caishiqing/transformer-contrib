@@ -1,70 +1,33 @@
+import os, argparse
+from transformer_contrib.keras_gpt_2 import load_gpt2_from_ckpt, get_bpe_from_files, generate
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-g", "--gpu", type=str, default='', help='chose a gpu')
+parser.add_argument("-l", "--length", type=int, default=100, help='sentence length')
+parser.add_argument("-k", "--topk", type=int, default=10, help='top k samples')
+parser.add_argument("-t", "--temperature", type=int, default=1.0, help='randomness of result')
+parser.add_argument("-d", "--dir", type=str, default='', help='model direction')
+args = parser.parse_args()
+
+os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
 
-def to_list(x, allow_tuple=False):
-    """Normalizes a list/tensor into a list.
-
-    If a tensor is passed, we return
-    a list of size 1 containing the tensor.
-
-    # Arguments
-        x: target object to be normalized.
-        allow_tuple: If False and x is a tuple,
-            it will be converted into a list
-            with a single element (the tuple).
-            Else converts the tuple to a list.
-
-    # Returns
-        A list.
-    """
-    if isinstance(x, list):
-        return x
-    if allow_tuple and isinstance(x, tuple):
-        return list(x)
-    return [x]
-
-def unpack_singleton(x):
-    """Gets the first element if the iterable has only one value.
-
-    Otherwise return the iterable.
-
-    # Argument:
-        x: A list or tuple.
-
-    # Returns:
-        The same iterable or the first element.
-    """
-    if len(x) == 1:
-        return x[0]
-    return x
-
-def _collect_previous_mask(input_tensors):
-    """Retrieves the output mask(s) of the previous node.
-
-    # Arguments
-        input_tensors: A tensor or list of tensors.
-
-    # Returns
-        A mask tensor or list of mask tensors.
-    """
-    input_tensors = to_list(input_tensors)
-    masks = []
-    for x in input_tensors:
-        if hasattr(x, '_keras_history'):
-            inbound_layer, node_index, tensor_index = x._keras_history
-            node = inbound_layer._inbound_nodes[node_index]
-            mask = node.output_masks[tensor_index]
-            masks.append(mask)
-        else:
-            masks.append(None)
-    return unpack_singleton(masks)
+model_folder = args.dir
+encoder_path = os.path.join(model_folder, 'encoder.json')
+vocab_path = os.path.join(model_folder, 'vocab.bpe')
 
 
-if __name__ == '__main__':
-    from transformer_contrib.keras_gpt_2 import get_gpt2
-    import keras
-    import keras.backend as K
-    import tensorflow as tf
+print('Load model from checkpoint...')
+model = load_gpt2_from_ckpt(model_folder)
+print('Load BPE from files...')
+bpe = get_bpe_from_files(encoder_path, vocab_path)
 
-    x = tf.constant([[0,0,1,2,3]], dtype='float32')
-    gpt = get_gpt2(100,10,pad_id=0)
-    y = gpt(x)
+while True:
+    print('Input a piece of sentence: ')
+    text = input()
+    print('Generate text...')
+    output = generate(model, bpe, [text], length=args.length, top_k=args.topk)
+
+    # If you are using the 117M model and top_k equals to 1, then the result would be:
+    # "From the day forth, my arm was broken, and I was in a state of pain. I was in a state of pain,"
+    print(output[0])

@@ -1,6 +1,6 @@
 import tensorflow as tf
-from .backend import keras
-from .backend import backend as K
+from transformer_contrib.backend import keras
+from transformer_contrib.backend import backend as K
 
 __all__ = ['Memory']
 

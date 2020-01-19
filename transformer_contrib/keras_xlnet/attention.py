@@ -1,6 +1,6 @@
 import tensorflow as tf
-from .backend import keras, activations, initializers, regularizers, constraints, TF_KERAS
-from .backend import backend as K
+from transformer_contrib.backend import keras, activations, initializers, regularizers, constraints, TF_KERAS
+from transformer_contrib.backend import backend as K
 
 __all__ = ['RelativePartialMultiHeadSelfAttention']
 

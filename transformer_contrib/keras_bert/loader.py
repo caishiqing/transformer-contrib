@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 from .bert import get_bert
 from .tokenizer import Tokenizer, load_vocab
-from .backend import keras
+from transformer_contrib.backend import keras
 
 
 __all__ = [

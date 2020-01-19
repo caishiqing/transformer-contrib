@@ -1,5 +1,5 @@
-from .backend import keras, utils
-from .backend import backend as K
+from transformer_contrib.backend import keras, utils
+from transformer_contrib.backend import backend as K
 
 
 class LayerNormalization(keras.layers.Layer):

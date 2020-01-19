@@ -1,4 +1,4 @@
-from .backend import keras
+from transformer_contrib.backend import keras
 
 __all__ = ['Scale']
 

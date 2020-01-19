@@ -1,16 +1,16 @@
 import math
 import numpy as np
-from ..keras_layers import PositionEmbedding, LayerNormalization
-from ..keras_transformer import get_encoders, gelu
-from .backend import keras
-from .backend import backend as K
+from transformer_contrib.keras_layers import PositionEmbedding, LayerNormalization
+from transformer_contrib.keras_transformer import get_encoders, gelu
+from transformer_contrib.backend import keras
+from transformer_contrib.backend import backend as K
+from transformer_contrib.optimizers import AdamWarmup
 from .layers import get_inputs, get_embedding, TokenEmbedding, EmbeddingSimilarity, Masked, Extract
-from .optimizers import AdamWarmup
 
 
 __all__ = [
     'TOKEN_PAD', 'TOKEN_UNK', 'TOKEN_CLS', 'TOKEN_SEP', 'TOKEN_MASK',
-    'get_bert', 'get_base_dict', 'gen_batch_inputs', 'compile_model',
+    'get_model', 'get_base_dict', 'gen_batch_inputs', 'compile_model',
     'get_token_embedding',
 ]
 
@@ -21,7 +21,7 @@ TOKEN_CLS = '[CLS]'  # Token for classification
 TOKEN_SEP = '[SEP]'  # Token for separation
 TOKEN_MASK = '[MASK]'  # Token for masking
 
-def get_bert(token_num,
+def get_model(token_num,
              pos_num=512,
              seq_len=512,
              embed_dim=768,
@@ -115,16 +115,6 @@ def get_bert(token_num,
         model = keras.models.Model(inputs=inputs, outputs=[masked_layer, nsp_pred_layer])
         for layer in model.layers:
             layer.trainable = _trainable(layer)
-        model.compile(
-            optimizer=AdamWarmup(
-                decay_steps=decay_steps,
-                warmup_steps=warmup_steps,
-                lr=lr,
-                weight_decay=weight_decay,
-                weight_decay_pattern=['embeddings', 'kernel', 'W1', 'W2', 'Wk', 'Wq', 'Wv', 'Wo'],
-            ),
-            loss=keras.losses.sparse_categorical_crossentropy,
-        )
         return model
     else:
         inputs = inputs[:2]

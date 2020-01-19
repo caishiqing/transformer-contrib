@@ -1,5 +1,5 @@
-from .backend import keras
-from .backend import backend as K
+from transformer_contrib.backend import keras
+from transformer_contrib.backend import backend as K
 
 class PositionEmbedding(keras.layers.Layer):
     """Turn integers (positions) into dense vectors of fixed size.

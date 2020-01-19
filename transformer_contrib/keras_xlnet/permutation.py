@@ -1,7 +1,7 @@
 from tensorflow.python.ops.random_ops import random_shuffle
 
-from .backend import keras
-from .backend import backend as K
+from transformer_contrib.backend import keras
+from transformer_contrib.backend import backend as K
 
 __all__ = ['PermutationMask']
 

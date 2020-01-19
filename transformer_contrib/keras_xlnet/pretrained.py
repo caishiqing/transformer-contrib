@@ -2,7 +2,7 @@ import os
 import shutil
 from collections import namedtuple
 
-from .backend import keras
+from transformer_contrib.backend import keras
 
 __all__ = ['PretrainedInfo', 'PretrainedList', 'get_pretrained_paths']
 

@@ -1,5 +1,5 @@
 import os, argparse
-from keras_gpt_2 import load_trained_model_from_checkpoint, get_bpe_from_files, generate
+from keras_gpt_2 import load_gpt2_from_ckpt, get_bpe_from_files, generate
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-g", "--gpu", type=str, default='', help='chose a gpu')
@@ -13,14 +13,12 @@ os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
 
 model_folder = args.dir
-config_path = os.path.join(model_folder, 'hparams.json')
-checkpoint_path = os.path.join(model_folder, 'model.ckpt')
 encoder_path = os.path.join(model_folder, 'encoder.json')
 vocab_path = os.path.join(model_folder, 'vocab.bpe')
 
 
 print('Load model from checkpoint...')
-model = load_trained_model_from_checkpoint(config_path, checkpoint_path)
+model = load_gpt2_from_ckpt(model_folder)
 print('Load BPE from files...')
 bpe = get_bpe_from_files(encoder_path, vocab_path)
 

@@ -1,5 +1,5 @@
 import math
-from .backend import backend as K
+from transformer_contrib.backend import backend as K
 
 
 def gelu(x):

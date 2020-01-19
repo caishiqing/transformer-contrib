@@ -1,7 +1,7 @@
 import json
 import numpy as np
 import tensorflow as tf
-from .backend import backend as K
+from transformer_contrib.backend import backend as K
 from .transformer_xl import build_transformer_xl
 
 

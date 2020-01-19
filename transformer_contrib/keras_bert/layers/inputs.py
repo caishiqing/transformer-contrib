@@ -1,4 +1,4 @@
-from ..backend import keras
+from transformer_contrib.backend import keras
 
 
 def get_inputs(seq_len):

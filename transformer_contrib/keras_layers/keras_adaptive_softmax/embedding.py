@@ -1,5 +1,5 @@
-from .backend import keras, initializers, regularizers, constraints
-from .backend import backend as K
+from transformer_contrib.backend import keras, initializers, regularizers, constraints
+from transformer_contrib.backend import backend as K
 
 __all__ = ['AdaptiveEmbedding']
 

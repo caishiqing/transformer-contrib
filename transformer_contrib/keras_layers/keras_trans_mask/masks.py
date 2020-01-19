@@ -1,6 +1,6 @@
-from .backend import keras
-from .backend import backend as K
-from .backend import utils
+from transformer_contrib.backend import keras
+from transformer_contrib.backend import backend as K
+from transformer_contrib.backend import utils
 
 __all__ = ['CreateMask', 'RemoveMask', 'RestoreMask']
 

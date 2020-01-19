@@ -1,7 +1,14 @@
-from .backend import keras
-from ..keras_layers import (EmbeddingRet, EmbeddingSim,
-                            PositionEmbedding, LayerNormalization)
-from ..keras_transformer import gelu, attention_builder, feed_forward_builder
+from transformer_contrib.backend import keras
+from transformer_contrib.keras_layers import (EmbeddingRet,
+                                              EmbeddingSim,
+                                              PositionEmbedding,
+                                              LayerNormalization)
+from transformer_contrib.keras_transformer import (gelu,
+                                                   attention_builder,
+                                                   feed_forward_builder)
+
+__all__ = ['get_model']
+
 
 def _wrap_layer(name, input_layer, build_func, trainable=True):
     """Wrap layers with normalization and residual.
@@ -66,18 +73,18 @@ def _get_encoder_component(name,
     return feed_forward_layer
 
 
-def get_gpt2(n_vocab,
-             n_ctx=1024,
-             n_embd=768,
-             n_head=12,
-             n_layer=12,
-             pad_id=None,
-             hidden_dim=None,
-             batch_size=None,
-             fixed_input_shape=False,
-             return_last_layer=True,
-             return_logits=False,
-             compile=True):
+def get_model(n_vocab,
+              n_ctx=1024,
+              n_embd=768,
+              n_head=12,
+              n_layer=12,
+              pad_id=None,
+              hidden_dim=None,
+              batch_size=None,
+              fixed_input_shape=False,
+              return_last_layer=True,
+              return_logits=False,
+              compile=True):
     """Get basic GPT-2 model.
 
     :param n_vocab: Number of vocabulary tokens.
