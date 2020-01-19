@@ -1,28 +1,44 @@
+import os
+import re
+import codecs
 from setuptools import setup, find_packages
 
-setup(name='transformer_contrib',
-      version='0.0.1',
-      description='Deep learning of NLP',
-      author='Cai Shiqing',
-      author_email='caishiqing@tom.com',
-      url='',
-      download_url='',
-      license='MIT',
-      install_requires=[],
-      extras_require={},
-      classifiers=[
-          'Development Status :: 5 - Production/Stable',
-          'Intended Audience :: Developers',
-          'Intended Audience :: Education',
-          'Intended Audience :: Science/Research',
-          'License :: OSI Approved :: MIT License',
-          'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.6',
-          'Topic :: Software Development :: Libraries',
-          'Topic :: Software Development :: Libraries :: Python Modules'
-      ],
-      keywords='NLP, Language Model, Transformer',
-      packages=find_packages(),
-      package_dir={'transformer_contrib': 'transformer_contrib'},
-      )
+current_path = os.path.abspath(os.path.dirname(__file__))
 
+
+def read_file(*parts):
+    with codecs.open(os.path.join(current_path, *parts), 'r', 'utf8') as reader:
+        return reader.read()
+
+
+def get_requirements(*parts):
+    with codecs.open(os.path.join(current_path, *parts), 'r', 'utf8') as reader:
+        return list(map(lambda x: x.strip(), reader.readlines()))
+
+
+def find_version(*file_paths):
+    version_file = read_file(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError('Unable to find version string.')
+
+
+setup(
+    name='keras-transformer',
+    version=find_version('transformer_contrib', '__init__.py'),
+    packages=find_packages(),
+    url='https://github.com/caishiqing/transformer-contrib',
+    license='MIT',
+    author='caishiqing',
+    author_email='caishiqing@tom.com',
+    description='Transformer contributions',
+    long_description=read_file('README.md'),
+    long_description_content_type='text/markdown',
+    #install_requires=get_requirements('requirements.txt'),
+    classifiers=(
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ),
+)
