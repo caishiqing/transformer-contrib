@@ -107,11 +107,22 @@ def get_model(token_num,
             name='NSP',
         )(nsp_dense_layer)
         model = keras.models.Model(inputs=inputs, outputs=[masked_layer, nsp_pred_layer])
+        for layer in model.layers:
+            layer.trainable = _trainable(layer)
     else:
         inputs = inputs[:2]
         model = keras.models.Model(inputs=inputs, outputs=transformed)
-    
-    model.trainalble = trainable
+        for layer in model.layers:
+            layer.trainable = _trainable(layer)
+        output_layer_num = min(output_layer_num, transformer_num)
+        if output_layer_num > 1:
+            outputs = []
+            for i in range(output_layer_num):
+                layer = model.get_layer(name='Encoder-{}-FeedForward-Norm'.format(transformer_num - i))
+                outputs.append(layer.output)
+            transformed = keras.layers.Concatenate(name='Encoder-Output')(list(reversed(outputs)))
+        model = keras.models.Model(inputs=inputs, outputs=transformed)
+
     return model
 
 
