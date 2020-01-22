@@ -217,6 +217,8 @@ def multi_gpu_model(model,
 
     # Exclude first gpu
     if not first_gpu:
+        if num_gpus <= 2:
+            raise Exception("gpus must be more than 2 when first_gpu=False.")
         target_gpu_ids = target_gpu_ids[1:]
         num_gpus -= 1
 
