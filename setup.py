@@ -25,7 +25,7 @@ def find_version(*file_paths):
 
 
 setup(
-    name='keras-transformer',
+    name='transformer-contrib',
     version=find_version('transformer_contrib', '__init__.py'),
     packages=find_packages(),
     url='https://github.com/caishiqing/transformer-contrib',
