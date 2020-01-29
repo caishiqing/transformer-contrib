@@ -64,6 +64,8 @@ def top_k_logits(logits, k):
 
 def top_p_logits(logits, p):
     """Nucleus sampling"""
+    if p >= 1.0:
+        return logits
     batch, _ = logits.shape.as_list()
     sorted_logits = tf.contrib.framework.sort(logits, direction='DESCENDING', axis=-1)
     cumulative_probs = tf.cumsum(tf.nn.softmax(sorted_logits, axis=-1), axis=-1)
