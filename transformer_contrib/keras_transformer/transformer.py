@@ -368,7 +368,7 @@ def get_model(token_num,
         dropout_rate=dropout_rate,
         trainable=trainable,
     )
-    encoder = keras.models.Model(inputs=encoder_input, outputs=encoder_embed)
+    encoder = keras.models.Model(inputs=encoder_input, outputs=encoded_layer)
     
     encoder_h = keras.layers.Input(shape=(None, embed_dim), name='Encoder-H')
     decoder_x = keras.layers.Input(shape=(None,), name='Decoder-X')
@@ -396,7 +396,7 @@ def get_model(token_num,
     decoder = keras.models.Model(inputs=[encoder_h, decoder_x], outputs=dense_layer)
     
     decoder_input = keras.layers.Input(shape=(None,), name='Decoder-Input')
-    decoder_output = decoder([encoder_embed, decoder_input])
+    decoder_output = decoder([encoded_layer, decoder_input])
     model = keras.models.Model(inputs=[encoder_input, decoder_input], outputs=decoder_output)
     
     return model, encoder, decoder
