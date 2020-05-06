@@ -146,7 +146,7 @@ def load_trained_model_from_checkpoint(config_file,
                                        dropout=None,
                                        transformer_num=None,
                                        training=False,
-                                       trainable=None,
+                                       trainable=True,
                                        seq_len=None):
     """Load trained official model from checkpoint.
 
