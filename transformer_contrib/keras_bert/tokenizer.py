@@ -35,9 +35,6 @@ class Tokenizer(object):
 
     def __init__(self,
                  token_dict,
-                 token_cls=TOKEN_CLS,
-                 token_sep=TOKEN_SEP,
-                 token_unk=TOKEN_UNK,
                  pad_index=0,
                  cased=False):
         """Initialize tokenizer.
@@ -51,11 +48,17 @@ class Tokenizer(object):
         """
         self._token_dict = token_dict
         self._token_dict_inv = {v: k for k, v in token_dict.items()}
-        self._token_cls = token_cls
-        self._token_sep = token_sep
-        self._token_unk = token_unk
+        self._token_cls = TOKEN_CLS
+        self._token_sep = TOKEN_SEP
+        self._token_unk = TOKEN_UNK
         self._pad_index = pad_index
         self._cased = cased
+
+    @classmethod
+    def from_file(cls, vocab_path, pad_index=0, cased=False):
+        token_dict = load_vocab(vocab_path)
+        return cls(token_dict, pad_index, cased)
+        
 
     @staticmethod
     def _truncate(first_tokens, second_tokens=None, max_len=None):

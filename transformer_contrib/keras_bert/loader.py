@@ -12,7 +12,6 @@ __all__ = [
     'load_trained_model_from_checkpoint',
     'load_bert_from_ckpt',
     'load_bert_from_hdf5',
-    'load_tokenizer',
 ]
 
 
@@ -245,11 +244,5 @@ def load_bert_from_hdf5(hdf5_file,
     model.trainable = trainable
     return model
 
-
-def load_tokenizer(path):
-    token_dict = load_vocab(path)
-    tokenizer = Tokenizer(token_dict)
-    return tokenizer
-    
     
 
