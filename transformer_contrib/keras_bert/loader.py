@@ -168,8 +168,9 @@ def load_trained_model_from_checkpoint(config_file,
 def load_bert_from_ckpt(ckpt_path, **kwargs):
     config_file = os.path.join(ckpt_path, 'bert_config.json')
     checkpoint_file = os.path.join(ckpt_path, 'bert_model.ckpt')
-    return load_trained_model_from_checkpoint(config_file, checkpoint_file,
-                                              **kwargs)
+    return load_trained_model_from_checkpoint(
+        config_file, checkpoint_file, **kwargs
+    )
 
 def load_bert_from_hdf5(hdf5_file,
                         transformer_num=None,

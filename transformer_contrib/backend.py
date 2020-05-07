@@ -1,4 +1,5 @@
 import os
+import tensorflow as tf
 
 __all__ = [
     'keras', 'utils', 'activations', 'applications', 'backend', 'datasets', 'engine',
@@ -9,8 +10,10 @@ __all__ = [
 TF_KERAS = False
 EAGER_MODE = False
 
+if tf.__version__.split('.')[0] == '2':
+    os.environ['TF_KERAS'] = '1'
+
 if os.environ.get('TF_KERAS', '0') != '0':
-    import tensorflow as tf
     from tensorflow.python import keras
     TF_KERAS = True
     [tf.enable_eager_execution() for _ in range(1)
