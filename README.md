@@ -1,12 +1,14 @@
 # Transformer系列模型keras集成
 
-本项目集成了keras官方Transformer系列模型包，其中大部分来自于[CyberZHG](https://github.com/CyberZHG)，由于每个模型和网络层都是独立的安装包，安装比较繁琐，所以本项目对这些包做了集成封装，所有的自定义类型自动添加到keras类型中，可以方便地序列化与加载。如果要使用 `tensorflow.python.keras`，加入配置
+本项目集成了keras官方Transformer系列模型包，其中大部分来自于[CyberZHG](https://github.com/CyberZHG)，由于每个模型和网络层都是独立的安装包，安装比较繁琐，所以本项目对这些包做了集成封装，所有的自定义类型自动注册，可以方便地序列化与加载。如果要使用 `tf.keras`，加入配置
 
 ```python
 os.environ['TF_KERAS'] = '1'
 ```
 
+如果使用 tf2.x ，则默认开启 TF_KERAS，不需要手动配置。
 
+使用 tf1.x 建议 使用`tf.keras`或者 tf=1.12.0 + keras=2.2.4，其他版本组合没有详细测试。
 
 ## 更新说明
 
@@ -35,13 +37,14 @@ att = MultiHeadAttention(head_num=8, activation='relu')(x)
 
 ## Transformer
 
-Transformer模型定义在transformer_contrib.keras_transformer中，模型与**Attention is all your need**论文中一致，具体调用实例如下
+Transformer模型定义在transformer_contrib.keras_transformer中，模型与 **Attention is all your need** 论文中一致，具体调用实例如下
 
 ```python
 from transformer_contrib.keras_transformer import get_model
 
 # Build the model
-model = get_model(
+# model是综合模型，encoder、decoder分别为对应的编码器解码器子模块
+model, encoder, decoder = get_model(
     token_num=10000,
     embed_dim=30,
     encoder_num=3,
@@ -51,7 +54,6 @@ model = get_model(
     attention_activation='relu',
     feed_forward_activation='relu',
     dropout_rate=0.05,
-    embed_weights=np.random.random((13, 30)),
 )
 model.summary()
 
@@ -66,52 +68,67 @@ BERT模型的定义与预训练模型加载以及分词器接口在transformer_c
 ```python
 from transformer_contrib.keras_bert import Tokenizer
 
-token_dict = {
-    '[CLS]': 0,
-    '[SEP]': 1,
-    'un': 2,
-    '##aff': 3,
-    '##able': 4,
-    '[UNK]': 5,
-}
-tokenizer = Tokenizer(token_dict)  
-# from transformer_contrib.keras_bert import load_tokenizer
-# tokenizer = load_tokenizer('xxx/chinese_L-12_H-768_A-12/tokenizer.txt')
-print(tokenizer.tokenize('unaffable'))  # The result should be `['[CLS]', 'un', '##aff', '##able', '[SEP]']`
-indices, segments = tokenizer.encode('unaffable')
-print(indices)  # Should be `[0, 2, 3, 4, 1]`
-print(segments)  # Should be `[0, 0, 0, 0, 0]`
+# 从指定词典文件加载
+tokenizer = Tokenizer.from_file('../vocab.txt')
+# 常规分词
+tokens = tokenizer._tokenize('姚明身高221cm')
+# >> ['姚', '明', '身', '高', '221', '##cm']
 
-print(tokenizer.tokenize(first='unaffable', second='钢'))
-# The result should be `['[CLS]', 'un', '##aff', '##able', '[SEP]', '钢', '[SEP]']`
-indices, segments = tokenizer.encode(first='unaffable', second='钢', max_len=10)
-print(indices)  # Should be `[0, 2, 3, 4, 1, 5, 1, 0, 0, 0]`
-print(segments)  # Should be `[0, 0, 0, 0, 0, 1, 1, 0, 0, 0]`
+# 完整分词
+tokens = tokenizer.tokenize('姚明身高221cm')
+# >> ['[CLS]', '姚', '明', '身', '高', '221', '##cm', '[SEP]']
+
+# 句子对分词
+tokens = tokenizer.tokenize('姚明多高？', '姚明身高226cm')
+# >> ['[CLS]', '姚', '明', '多', '高', '？', '[SEP]', '姚', '明', '身', '高', '226', '##cm', '[SEP]']
+
+# 也可以直接编码，编码序列与分词结果对应，返回 sequence 与 segment 两个对象
+seq, seg = tokenizer.encode('姚明多高？', '姚明身高226cm')
+# >> seq: [101, 2001, 3209, 1914, 7770, 8043, 102, 2001, 3209, 6716, 7770, 10436, 8341, 102]
+# >> seg: [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1])
+
+# 编码的同时可以把最大长度填充也给做了
+seq, seg = tokenizer.encode('姚明多高？', '姚明身高226cm', max_len=18)
+# >> seq: [101, 2001, 3209, 1914, 7770, 8043, 102, 2001, 3209, 6716, 7770, 10436, 8341, 102, 0, 0, 0, 0]
+# >> seg: [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+# 如果句子长度超过最大长度需要做截断，会动态地截断两个句子中较长的那个
+
+# 有些任务需要标注句子中的子片段
+text = '姚明身高221cm，被称为小巨人。'
+s, e = 4, 8  # 221cm
+tokens = tokenizer._tokenize(text)  # 不要加[CLS]和[SEP]
+# >> ['姚', '明', '身', '高', '221', '##cm', '，', '被', '称', '为', '小', '巨', '人', '。']
+intervals = tokenizer.rematch(text, tokens)  # 每一个token对应原字符串的（起始索引，结束索引）
+token_bound = tokenizer.transform_bound(intervals, start=s, end=e)
+# >> token_bound = (4, 5)
+# 输出“221cm”这个子串对应的 token 子序列的首尾位置，注意是位置不是片段索引，尾部位置=尾部片段索引-1：
+# tokens[4: 5] = ['221'], tokens[4: 6] = ['221', 'cm']
 ```
 
-模型训练与使用：
+
+
+模型训练与使用（以文本分类为例）：
 
 ```python
-import os
-from transformer_cpntrib.keras_bert import load_bert_from_ckpt
-from keras.layers import Dense, Lambda
-from keras.models import Model
-from keras.optimizers import Adam
+# 如果要使用 tf.keras（tf2.x不需要配置）,需要在导入transformer_contrib包之前配置：
+# import os
+# os.['TF_KERAS'] = '1'
+from transformer_contrib.keras_bert import load_bert_from_ckpt
+from transformer.backend import keras
 
-layer_num = 12
 checkpoint_path = '../uncased_L-12_H-768_A-12'
 
 bert = load_bert_from_ckpt(
     checkpoint_path,
-    training=False,
-    use_adapter=True,
-    trainable=True,
+    training=False,  # 去掉顶层网络
+    trainable=True,  # 参数可训练
 )
-h = Lambda(lambda x:x[:,0,:])(bert.output)
-y = Dense(10, activation='softmax')(h)
-model = Model(bert.inputs, y)
+h = keras.layers.Lambda(lambda x:x[:,0,:])(bert.output)
+y = keras.layers.Dense(10, activation='softmax')(h)
+model = keras.Model(bert.inputs, y)
 model.summary()
 model.compile(optimizer=Adam(1e-4), loss='categorical_crossentropy')
+# 添加训练数据与代码。。。。
 ```
 
 
