@@ -113,8 +113,9 @@ token_bound = tokenizer.transform_bound(intervals, start=s, end=e)
 # 如果要使用 tf.keras（tf2.x不需要配置）,需要在导入transformer_contrib包之前配置：
 # import os
 # os.['TF_KERAS'] = '1'
-from transformer_contrib.keras_bert import load_bert_from_ckpt
+from transformer_contrib.keras_bert import load_bert_from_ckpt, Tokenizer
 from transformer.backend import keras
+import tensorflow as tf
 
 checkpoint_path = '../uncased_L-12_H-768_A-12'
 
@@ -128,7 +129,32 @@ y = keras.layers.Dense(10, activation='softmax')(h)
 model = keras.Model(bert.inputs, y)
 model.summary()
 model.compile(optimizer=Adam(1e-4), loss='categorical_crossentropy')
-# 添加训练数据与代码。。。。
+
+tokenizer = Tokenizer.from_file('../uncased_L-12_H-768_A-12/vocab.txt')
+
+def get_dataset(data, batch_size=16, max_len=128):
+    # data: list of (text, label)
+    import random
+    random.shuffle(data)
+    seqs, segs, labels = [], [], []
+    for text, label in data:
+        seq, seg = tokenizer.encode(text, max_len=max_len)
+        seqs.append(seq)
+        segs.append(seg)
+        labels.append(label)
+    
+    dataset = tf.data.Dataset.from_tensoror_slices(
+        ((seqs, segs), labels)).batch(batch_size, drop_remainder=True)
+    return dataset
+
+# 假设已经加载了训练集和验证集
+train_dataset = get_dataset(train_data)
+valid_dataset = get_dataset(valid_data)
+model.fit(
+    x=train_dataset,
+    validation_data=valid_dataset,
+    epochs=10,
+)
 ```
 
 
