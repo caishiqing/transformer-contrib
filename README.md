@@ -114,7 +114,7 @@ token_bound = tokenizer.transform_bound(intervals, start=s, end=e)
 # import os
 # os.['TF_KERAS'] = '1'
 from transformer_contrib.keras_bert import load_bert_from_ckpt, Tokenizer
-from transformer.backend import keras
+from transformer_contrib.backend import keras
 import tensorflow as tf
 
 checkpoint_path = '../uncased_L-12_H-768_A-12'
