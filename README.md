@@ -116,6 +116,7 @@ token_bound = tokenizer.transform_bound(intervals, start=s, end=e)
 from transformer_contrib.keras_bert import load_bert_from_ckpt, Tokenizer
 from transformer_contrib.backend import keras
 import tensorflow as tf
+import numpy as np
 
 checkpoint_path = '../uncased_L-12_H-768_A-12'
 
@@ -124,8 +125,8 @@ bert = load_bert_from_ckpt(
     training=False,  # 去掉顶层网络
     trainable=True,  # 参数可训练
 )
-h = keras.layers.Lambda(lambda x:x[:,0,:])(bert.output)
-y = keras.layers.Dense(10, activation='softmax')(h)
+h = keras.layers.Lambda(lambda x:x[:, 0, :])(bert.output)
+y = keras.layers.Dense(10, activation='softmax')(h)  # 假设类型数量为10
 model = keras.Model(bert.inputs, y)
 model.summary()
 model.compile(optimizer=Adam(1e-4), loss='categorical_crossentropy')
@@ -154,7 +155,17 @@ model.fit(
     x=train_dataset,
     validation_data=valid_dataset,
     epochs=10,
+    steps_per_epochs=200,
+    validation_steps=100,
 )
+
+# 模型推断
+text = 'xxxxxx'
+seq, seg = tokenizer.encode(text, max_len=128)
+seq = np.asarray([seq], dtype='int32')
+seg = np.asarray([seg], dtype='int32')
+y = model.predict([seq, seg])  # shape = (1, 10)
+print(np.argmax(y[0]))
 ```
 
 
