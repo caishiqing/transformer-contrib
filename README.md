@@ -119,21 +119,25 @@ import tensorflow as tf
 import numpy as np
 
 checkpoint_path = '../uncased_L-12_H-768_A-12'
+max_len = 128
+batch_size = 16
+lable_size = 10
 
 bert = load_bert_from_ckpt(
     checkpoint_path,
+    seq_len=max_len,
     training=False,  # 去掉顶层网络
     trainable=True,  # 参数可训练
 )
 h = keras.layers.Lambda(lambda x:x[:, 0, :])(bert.output)
-y = keras.layers.Dense(10, activation='softmax')(h)  # 假设类型数量为10
+y = keras.layers.Dense(label_size, activation='softmax')(h)  
 model = keras.Model(bert.inputs, y)
 model.summary()
 model.compile(optimizer=Adam(1e-4), loss='categorical_crossentropy')
 
 tokenizer = Tokenizer.from_file('../uncased_L-12_H-768_A-12/vocab.txt')
 
-def get_dataset(data, batch_size=16, max_len=128):
+def get_dataset(data):
     # data: list of (text, label)
     import random
     random.shuffle(data)
@@ -142,8 +146,9 @@ def get_dataset(data, batch_size=16, max_len=128):
         seq, seg = tokenizer.encode(text, max_len=max_len)
         seqs.append(seq)
         segs.append(seg)
-        labels.append(label)
+        labels.append(tf.label)
     
+    labels = tf.one_hot(labels, label_size)
     dataset = tf.data.Dataset.from_tensoror_slices(
         ((seqs, segs), labels)).batch(batch_size, drop_remainder=True)
     return dataset
@@ -161,7 +166,7 @@ model.fit(
 
 # 模型推断
 text = 'xxxxxx'
-seq, seg = tokenizer.encode(text, max_len=128)
+seq, seg = tokenizer.encode(text, max_len=max_len)
 seq = np.asarray([seq], dtype='int32')
 seg = np.asarray([seg], dtype='int32')
 y = model.predict([seq, seg])  # shape = (1, 10)
