@@ -196,11 +196,11 @@ class Tokenizer(object):
     def _is_control(ch):
         return unicodedata.category(ch) in ('Cc', 'Cf')
 
-    def rematch(self, text, tokens, cased=False, unknown_token=TOKEN_UNK):
+    def rematch(self, text, tokens):
         """Try to find the indices of tokens in the original text.
         """
         text = convert_to_unicode(text)
-        if not cased:
+        if not self.cased:
             new_text = ''
             match = []
             for idx, ch in enumerate(text):
