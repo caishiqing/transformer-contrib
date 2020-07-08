@@ -200,7 +200,7 @@ class Tokenizer(object):
         """Try to find the indices of tokens in the original text.
         """
         text = convert_to_unicode(text)
-        if not self.cased:
+        if not self._cased:
             new_text = ''
             match = []
             for idx, ch in enumerate(text):
